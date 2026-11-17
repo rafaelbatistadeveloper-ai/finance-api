@@ -173,6 +173,9 @@ CREATE INDEX installments_due_idx ON installments (due_month);
 - **Versionamento de conta recorrente (R4.5, R4.6):** editar fecha a versão atual (`active_until` = mês anterior) e cria outra com `active_from` = mês corrente. Desativar só define `active_until`. Meses passados continuam apontando para a versão que valia.
 - **Pendente é derivado (R5.1):** não se gera linha para cada mês. Uma conta é pendente se estiver ativa no mês e não existir `bill_payments` para ela naquele mês. Isso permite consultar meses futuros sem tarefa agendada.
 - **Renda com vigência (R2.3):** a renda de um mês é a linha com maior `valid_from` menor ou igual ao mês.
+- **Isolamento garantido pelo banco (R1.5, R7.10):** `categories`, `rooms` e `recurring_bills` têm `UNIQUE (id, user_id)`, e `expenses`, `recurring_bills` e `bill_payments` referenciam esses registros por chave estrangeira composta `(id, user_id)`. Assim, mesmo um bug na aplicação não consegue gravar um gasto com a categoria ou o ambiente de outro usuário. Com `room_id` nulo a chave composta não é verificada.
+- **Mês é sempre o primeiro dia (implementação da tarefa 3):** `valid_from`, `active_from`, `active_until`, `month` e `due_month` têm `CHECK (date_part('day', x) = 1)`.
+- **Ids gerados pelo banco:** `id uuid DEFAULT gen_random_uuid()`, o que permite `INSERT ... RETURNING *` sem gerar UUID na aplicação.
 - **Categoria e ambiente em uso (R3.3, R7.9):** `ON DELETE` padrão (`RESTRICT`). O service captura a violação de chave estrangeira e devolve erro de domínio.
 
 ## 4. Regras de domínio

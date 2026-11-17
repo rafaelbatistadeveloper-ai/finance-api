@@ -9,8 +9,9 @@ endif
 run:
 	go run ./cmd/api
 
+# Usa TEST_DATABASE_URL (do .env) para os testes de integração; sem ela, eles são ignorados.
 test:
-	go test ./...
+	go test ./... -count=1
 
 vet:
 	go vet ./...
